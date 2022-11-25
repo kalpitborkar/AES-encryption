@@ -194,6 +194,47 @@ unsigned char mul14[256] =
 	0xd7,0xd9,0xcb,0xc5,0xef,0xe1,0xf3,0xfd,0xa7,0xa9,0xbb,0xb5,0x9f,0x91,0x83,0x8d
 };
 
+void KeyExpansionCore(unsigned char *in, unsigned char i){
+    // Rotate left by one byte
+    unsigned char t = in[0];
+    in[0] = in[1];
+	in[1] = in[2];
+	in[2] = in[3];
+	in[3] = t;
+
+    // Map with S-box
+    in[0] = s[in[0]];
+	in[1] = s[in[1]];
+	in[2] = s[in[2]];
+	in[3] = s[in[3]];
+
+    // RCon XOR
+    in[0] ^= rcon[i];
+}
+
+void KeyExpansion(unsigned char inputKey[16], unsigned char expandedKeys[176]){
+    for (int i = 0; i < 16; i++) {
+		expandedKeys[i] = inputKey[i];
+	}
+
+    int bytesGenerated = 16; 
+	int rconIteration = 1; 
+	unsigned char tmpCore[4]; 
+
+    while(bytesGenerated < 176){
+        for (int i = 0; i < 4; i++) {
+			tmpCore[i] = expandedKeys[i + bytesGenerated - 4];
+		}
+        if (bytesGenerated % 16 == 0) {
+			KeyExpansionCore(tmpCore, rconIteration++);
+		}
+        for (unsigned char a = 0; a < 4; a++) {
+			expandedKeys[bytesGenerated] = expandedKeys[bytesGenerated - 16] ^ tmpCore[a];
+			bytesGenerated++;
+		}
+    }
+
+}
 
 
 #endif
