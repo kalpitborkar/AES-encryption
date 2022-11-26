@@ -21,6 +21,7 @@ void SubBytes(unsigned char *state){
     }
 }
 
+// Shift left
 void ShiftRows(unsigned char *state){
     unsigned char tmp[16];
 
